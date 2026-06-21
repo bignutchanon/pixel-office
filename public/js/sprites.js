@@ -101,6 +101,32 @@ function drawBookshelf(ctx, x, y) {
   for (let i = 0; i < 8; i++) { p(3 + i * 4.4, 3, 3, 10, cols[i % 5]); p(3 + i * 4.4, 17, 3, 10, cols[(i + 2) % 5]); }
 }
 
+// ============================================================ decor
+export function drawRug(ctx, x, y, w, h, c) {
+  rect(ctx, x, y, w, h, c);
+  ctx.strokeStyle = 'rgba(255,255,255,0.10)'; ctx.lineWidth = 1;
+  ctx.strokeRect(R(x) + 1.5, R(y) + 1.5, R(w) - 3, R(h) - 3);
+}
+export function drawWindow(ctx, x, y) {
+  const p = (a, b, w, h, c) => rect(ctx, x + a, y + b, w, h, c);
+  p(0, 0, 18, 11, '#39424f'); p(2, 2, 14, 7, '#8fd0ff'); p(2, 2, 14, 2, '#c3e7ff');
+  p(8, 2, 2, 7, '#39424f'); p(2, 5, 14, 1, '#39424f');
+}
+export function drawClock(ctx, x, y) {
+  const p = (a, b, w, h, c) => rect(ctx, x + a, y + b, w, h, c);
+  p(0, 0, 9, 9, '#2b2f37'); p(1, 1, 7, 7, '#eef2f6'); p(4, 2, 1, 3, '#2b2f37'); p(4, 4, 3, 1, '#2b2f37');
+}
+export function drawPoster(ctx, x, y, c) {
+  const p = (a, b, w, h, col) => rect(ctx, x + a, y + b, w, h, col);
+  p(0, 0, 12, 9, '#2b2f37'); p(1, 1, 10, 7, c); p(2, 2, 8, 2, 'rgba(255,255,255,0.45)');
+}
+// small chair/stool drawn under a seated character (feet-anchored at x,y)
+export function drawStool(ctx, x, y) {
+  const p = (a, b, w, h, c) => rect(ctx, x + a, y + b, w, h, c);
+  p(-5, -4, 10, 4, '#3a3f4b'); p(-5, -4, 10, 1, '#4b5160');   // seat
+  p(-4, 0, 2, 4, '#2b2f37'); p(2, 0, 2, 4, '#2b2f37');        // legs
+}
+
 // ============================================================ character
 export function drawPerson(ctx, x, y, o) {
   ctx.fillStyle = 'rgba(0,0,0,0.18)';
@@ -196,6 +222,7 @@ export function drawEmote(ctx, x, y, glyph, t) {
     case 'dots': { const n = Math.floor((t || 0) / 300) % 3 + 1; for (let i = 0; i < n; i++) p(1 + i * 3, 5, 2, 2, g); } break;
     case 'coffee': p(2, 3, 6, 5, '#cdb79a'); p(8, 4, 1, 2, '#cdb79a'); p(2, 2, 6, 1, '#7a5a3a'); break;
     case 'idea': p(4, 1, 3, 4, '#ffe08a'); p(4, 6, 3, 1, '#caa84a'); break;
+    case 'watch': p(2, 3, 7, 1, g); p(1, 4, 1, 2, g); p(9, 4, 1, 2, g); p(2, 6, 7, 1, g); p(4, 4, 3, 2, '#7CFF6B'); break; // eye = monitoring
     default: break;
   }
 }

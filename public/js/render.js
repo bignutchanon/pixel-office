@@ -1,7 +1,7 @@
 // render.js — camera, walls + commons floor, depth-sorted scene, emotes, labels.
 
 import { TILE, DESK_W, DESK_H, POD_HEADER, WALL, actInfo, ctxColor, fmtCost, fmtTokens } from './config.js';
-import { drawWorkstation, drawPerson, drawPlant, drawAmenity, drawEmote } from './sprites.js';
+import { drawWorkstation, drawPerson, drawPlant, drawAmenity, drawEmote, drawRug, drawWindow, drawClock, drawPoster, drawStool } from './sprites.js';
 import { Assets } from './assets.js';
 
 const AMENITY_H = { coffee: 22, cooler: 18, sofa: 20, plant: 16, whiteboard: 4, meeting: 38, servers: 44, bookshelf: 30 };
@@ -20,10 +20,12 @@ function drawCharImage(ctx, occ) {
   const dirRows = Assets.layout().dirRows || ['down', 'left', 'right', 'up'];
   let dir = occ.dir, col = 0;
   if (occ.pose === 'desk') dir = 'up';
-  else if (occ.pose === 'sofa' || occ.pose === 'meetsit') dir = 'down';
+  else if (occ.pose === 'sofa') dir = 'down';
+  // meetsit / inspect keep occ.dir so seats face the table / the server rack
   else if (occ.moving) col = Math.floor(occ.phase * 2) % cols;
   let row = dirRows.indexOf(dir); if (row < 0) row = 0;
-  const dh = occ.isSub ? 22 : 28, dw = dh * (cw / ch);
+  const seated = occ.pose === 'meetsit' || occ.pose === 'sofa';
+  const dh = (occ.isSub ? 22 : 28) * (seated ? 0.82 : 1), dw = dh * (cw / ch);
   ctx.fillStyle = 'rgba(0,0,0,0.18)';
   ctx.beginPath(); ctx.ellipse(Math.round(occ.x), Math.round(occ.y), 7, 3, 0, 0, Math.PI * 2); ctx.fill();
   ctx.drawImage(img, col * cw, row * ch, cw, ch, Math.round(occ.x - dw / 2), Math.round(occ.y - dh), Math.round(dw), Math.round(dh));
@@ -117,6 +119,8 @@ export class Scene {
     for (const pod of world.podsForRender()) {
       ctx.fillStyle = '#262d37'; ctx.fillRect(pod.x, pod.y + POD_HEADER, pod.w, pod.h - POD_HEADER);
       ctx.fillStyle = '#2f3744'; ctx.fillRect(pod.x, pod.y + POD_HEADER, pod.w, 3);
+      ctx.strokeStyle = 'rgba(255,255,255,0.06)'; ctx.lineWidth = 1;
+      ctx.strokeRect(pod.x + 1.5, pod.y + POD_HEADER + 4.5, pod.w - 3, pod.h - POD_HEADER - 6);
       ctx.fillStyle = '#39424f'; ctx.fillRect(pod.x + 6, pod.y + 4, pod.w - 12, 13);
       ctx.fillStyle = '#4a90e0'; ctx.fillRect(pod.x + 6, pod.y + 4, 4, 13);
     }
@@ -144,6 +148,7 @@ export class Scene {
       if (occ.sitting) continue;
       units.push({
         y: occ.y, draw: () => {
+          if (occ.pose === 'meetsit') drawStool(ctx, occ.x, occ.y);
           if (occ.isSub && !Assets.charFor(occ.id)) {
             ctx.save(); ctx.translate(occ.x, occ.y); ctx.scale(0.82, 0.82); ctx.translate(-occ.x, -occ.y);
             drawPerson(ctx, occ.x, occ.y, occ.drawOpts()); ctx.restore();
@@ -254,6 +259,7 @@ export class Scene {
       for (let y = f.y; y <= f.y + f.h; y += TILE) { ctx.moveTo(f.x, y); ctx.lineTo(f.x + f.w, y); }
       ctx.stroke();
     }
+    for (const rg of (world.decor && world.decor.rugs) || []) drawRug(ctx, rg.x, rg.y, rg.w, rg.h, rg.color);
     this._walls(ctx, world);
   }
 
@@ -273,6 +279,12 @@ export class Scene {
     seg(o.x, o.y + o.h - WALL, o.w, WALL);
     seg(o.x, o.y, WALL, o.h);
     seg(o.x + o.w - WALL, o.y, WALL, o.h);
+
+    // wall fittings — windows, framed posters, a clock by the door
+    const d = world.decor || {};
+    for (const wd of d.windows || []) drawWindow(ctx, wd.x, wd.y);
+    for (const ps of d.posters || []) drawPoster(ctx, ps.x, ps.y, ps.c);
+    if (d.clock) drawClock(ctx, d.clock.x, d.clock.y);
   }
 }
 

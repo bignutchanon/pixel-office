@@ -8,7 +8,7 @@ import {
   WALL, COMMONS_H, MIN_OFFICE_W,
 } from './config.js';
 
-const S = (x, y) => ({ x, y });
+const S = (x, y, dir) => ({ x, y, dir });
 
 export class World {
   constructor() {
@@ -22,10 +22,11 @@ export class World {
 
     this.commons = { x: 0, y: 0, w: MIN_OFFICE_W, h: COMMONS_H };
     this.amenities = [];              // {type,x,y} furniture in the commons
-    this.spots = { coffee: [], lounge: [], meeting: [] };
+    this.spots = { coffee: [], lounge: [], meeting: [], servers: [] };
     this.wanderPts = [];
     this.claims = new Map();          // charId -> {type, idx}
     this.byKey = new Map();           // "type#idx" -> charId
+    this.decor = { rugs: [], windows: [], posters: [], clock: null }; // non-furniture dressing
   }
 
   sync(present) {
@@ -81,38 +82,74 @@ export class World {
     const cy = Math.max(podsBottom + 28, 60);
     this.commons = { x: 0, y: cy, w: officeW, h: COMMONS_H };
     this.amenities = [];
-    this.spots = { coffee: [], lounge: [], meeting: [] };
+    this.spots = { coffee: [], lounge: [], meeting: [], servers: [] };
     this.wanderPts = [];
 
     // coffee corner (left)
     const cofX = 22, cofY = cy + 30;
     this.amenities.push({ type: 'coffee', x: cofX, y: cofY });
     this.amenities.push({ type: 'cooler', x: cofX + 40, y: cofY + 2 });
-    this.spots.coffee.push(S(cofX + 8, cofY + 32), S(cofX + 30, cofY + 36));
+    this.spots.coffee.push(S(cofX + 8, cofY + 32, 'up'), S(cofX + 30, cofY + 36, 'up'));
 
     // lounge sofa (left-center)
     const loX = 118, loY = cy + 34;
     this.amenities.push({ type: 'sofa', x: loX, y: loY });
     this.amenities.push({ type: 'plant', x: loX + 60, y: loY + 2 });
-    this.spots.lounge.push(S(loX + 12, loY + 16), S(loX + 34, loY + 16));
+    this.spots.lounge.push(S(loX + 12, loY + 16, 'down'), S(loX + 34, loY + 16, 'down'));
 
     // meeting room (center-right): whiteboard + table + 6 seats
     const mtX = Math.max(loX + 156, Math.round(officeW * 0.46));
     const mtY = cy + 30, tH = 38;
     this.amenities.push({ type: 'whiteboard', x: mtX + 6, y: mtY - 22 });
     this.amenities.push({ type: 'meeting', x: mtX, y: mtY });
-    [[18, -10], [46, -10], [74, -10], [18, tH + 2], [46, tH + 2], [74, tH + 2]]
-      .forEach(([dx, dy]) => this.spots.meeting.push(S(mtX + dx, mtY + dy)));
+    // top-row seats face the table (down); bottom-row seats face up — so the
+    // meeting reads as people sitting around the table, not all facing away.
+    [[18, -10, 'down'], [46, -10, 'down'], [74, -10, 'down'], [18, tH + 2, 'up'], [46, tH + 2, 'up'], [74, tH + 2, 'up']]
+      .forEach(([dx, dy, dir]) => this.spots.meeting.push(S(mtX + dx, mtY + dy, dir)));
 
-    // server room (right)
+    // server room (right) — two inspection spots in front of the rack, facing it
     const svX = officeW - 92, svY = cy + 14;
     this.amenities.push({ type: 'servers', x: svX, y: svY });
+    this.spots.servers.push(S(svX + 14, svY + 70, 'up'), S(svX + 44, svY + 74, 'up'));
     this.amenities.push({ type: 'plant', x: svX - 24, y: svY + 44 });
     this.amenities.push({ type: 'bookshelf', x: 60, y: cy + COMMONS_H - 30 });
 
     // wander waypoints along the front aisle
     const n = 7;
     for (let i = 0; i < n; i++) this.wanderPts.push(S(34 + i * ((officeW - 68) / (n - 1)), cy + COMMONS_H - 20));
+
+    this._dress(officeW, cy);
+  }
+
+  // Fill the room so it reads as a lived-in office, not an empty hall.
+  // Extra furniture goes through the normal amenity (depth-sorted) path;
+  // rugs + wall fittings are stored in `decor` and drawn by the renderer.
+  _dress(officeW, cy) {
+    const H = COMMONS_H, doorX = officeW / 2;
+    const A = (type, x, y) => this.amenities.push({ type, x, y });
+
+    // a green planter divider between the desks and the commons (collision-safe:
+    // it sits in the aisle below every pod)
+    for (let x = 34; x < officeW - 24; x += 200) A('plant', x, cy - 18);
+    // potted plants in the commons corners
+    A('plant', 8, cy + 8); A('plant', officeW - 22, cy + 8);
+    A('plant', 10, cy + H - 22); A('plant', officeW - 22, cy + H - 22);
+    // a little more storage along the right wall
+    A('bookshelf', officeW - 32, cy + H - 64);
+
+    // area rugs that anchor each zone (drawn under the furniture)
+    const loX = 118, loY = cy + 34, cofX = 22, cofY = cy + 30;
+    const mtX = Math.max(loX + 156, Math.round(officeW * 0.46)), mtY = cy + 30;
+    const rugs = [
+      { x: cofX - 6, y: cofY - 2, w: 80, h: 46, color: '#3a3328' },   // coffee corner
+      { x: loX - 8, y: loY - 4, w: 72, h: 34, color: '#33283a' },     // lounge
+      { x: mtX - 14, y: mtY - 14, w: 122, h: 70, color: '#2c3a32' },  // meeting room
+    ];
+    // windows along the top wall (skip the door gap), framed posters in the corners
+    const windows = [];
+    for (let x = 64; x <= officeW - 80; x += 150) { if (Math.abs(x - doorX) < 30) continue; windows.push({ x, y: -WALL }); }
+    const posters = [{ x: 24, y: -WALL + 2, c: '#e0574f' }, { x: officeW - 40, y: -WALL + 2, c: '#5fbf5a' }];
+    this.decor = { rugs, windows, posters, clock: { x: doorX + 30, y: -WALL + 1 } };
   }
 
   // ---- desk helpers ----

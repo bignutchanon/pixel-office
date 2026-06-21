@@ -62,7 +62,11 @@ function chatPass() {
   for (const c of arr) c.chatWith = false;
   for (let i = 0; i < arr.length; i++) for (let j = i + 1; j < arr.length; j++) {
     const a = arr[i], b = arr[j];
-    if (Math.hypot(a.x - b.x, a.y - b.y) < BEHAVIOR.chatDist) { a.chatWith = true; b.chatWith = true; }
+    if (Math.hypot(a.x - b.x, a.y - b.y) < BEHAVIOR.chatDist) {
+      a.chatWith = true; b.chatWith = true;
+      a.chatFace = a.x <= b.x ? 'right' : 'left';  // turn to face whoever you're talking to
+      b.chatFace = a.x <= b.x ? 'left' : 'right';
+    }
   }
 }
 

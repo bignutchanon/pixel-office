@@ -31,6 +31,8 @@ export class Character {
     this.sitting = false;
     this.subCount = 0;
     this.chatWith = false;
+    this.chatFace = null;   // when chatting while standing, face the other person
+    this.seatDir = null;    // facing direction for the currently claimed seat
 
     this._breakInit = false;
     this.breakUntil = 0;
@@ -79,7 +81,8 @@ export class Character {
 
     if (this.isSub) {
       this.behavior = 'meeting';
-      this.target = world.claimSpot('meeting', this.id) || world.door;
+      const sp = world.claimSpot('meeting', this.id);
+      this.target = sp || world.door; this.seatDir = sp && sp.dir;
       return;
     }
     if (this.act === 'ask') {
@@ -90,7 +93,8 @@ export class Character {
     }
     if (this.subCount > 0 && this.active) {
       this.behavior = 'meeting';
-      this.target = world.claimSpot('meeting', this.id) || world.seat(this.id) || world.door;
+      const sp = world.claimSpot('meeting', this.id);
+      this.target = sp || world.seat(this.id) || world.door; this.seatDir = sp && sp.dir;
       return;
     }
     if (this.active) {
@@ -109,8 +113,10 @@ export class Character {
       this._breakInit = true;
       this.breakUntil = now + BEHAVIOR.breakMinMs + Math.random() * (BEHAVIOR.breakMaxMs - BEHAVIOR.breakMinMs);
       const r = Math.random();
-      if (r < 0.30) { this.breakAction = 'coffee'; this.breakPos = world.claimSpot('coffee', this.id); }
-      else if (r < 0.52) { this.breakAction = 'lounge'; this.breakPos = world.claimSpot('lounge', this.id); }
+      if (r < 0.22) { this.breakAction = 'coffee'; this.breakPos = world.claimSpot('coffee', this.id); }
+      else if (r < 0.42) { this.breakAction = 'lounge'; this.breakPos = world.claimSpot('lounge', this.id); }
+      else if (r < 0.58) { this.breakAction = 'servers'; this.breakPos = world.claimSpot('servers', this.id); }
+      else if (r < 0.74) { this.breakAction = 'meet'; this.breakPos = world.claimSpot('meeting', this.id); }
       else { this.breakAction = 'wander'; world.releaseClaim(this.id); this.breakPos = world.wanderPoint(); }
       if (!this.breakPos) { this.breakAction = 'wander'; world.releaseClaim(this.id); this.breakPos = world.wanderPoint(); }
     }
@@ -132,13 +138,17 @@ export class Character {
     switch (this.behavior) {
       case 'desk': this.pose = 'desk'; this.sitting = true; this.dir = 'up'; this.emote = this._workEmote(now); break;
       case 'deskidle': this.pose = 'desk'; this.sitting = true; this.dir = 'up'; this.emote = 'zzz'; break;
-      case 'meeting': this.pose = 'meetsit'; this.sitting = false; this.dir = 'down'; this.emote = this.chatWith ? 'dots' : null; break;
+      case 'meeting': this.pose = 'meetsit'; this.sitting = false; this.dir = this.seatDir || 'down'; this.emote = this.chatWith ? 'dots' : null; break;
       case 'alert': this.pose = 'wave'; this.sitting = false; this.dir = 'down'; this.emote = '!'; break;
-      case 'break':
-        if (this.breakAction === 'coffee') { this.pose = 'drink'; this.emote = 'coffee'; }
-        else if (this.breakAction === 'lounge') { this.pose = 'sofa'; this.emote = this.chatWith ? 'dots' : null; }
-        else { this.pose = 'stand'; this.emote = this.chatWith ? 'dots' : 'zzz'; }
-        this.sitting = false; this.dir = 'down'; break;
+      case 'break': {
+        const sd = (this.breakPos && this.breakPos.dir) || 'up';
+        if (this.breakAction === 'coffee') { this.pose = 'drink'; this.dir = sd; this.emote = 'coffee'; }
+        else if (this.breakAction === 'lounge') { this.pose = 'sofa'; this.dir = 'down'; this.emote = this.chatWith ? 'dots' : null; }
+        else if (this.breakAction === 'servers') { this.pose = 'inspect'; this.dir = sd; this.emote = 'watch'; }
+        else if (this.breakAction === 'meet') { this.pose = 'meetsit'; this.dir = sd === 'up' ? 'up' : 'down'; this.emote = this.chatWith ? 'dots' : null; }
+        else { this.pose = 'stand'; this.dir = (this.chatWith && this.chatFace) ? this.chatFace : 'down'; this.emote = this.chatWith ? 'dots' : 'zzz'; }
+        this.sitting = false; break;
+      }
       case 'leave': this.pose = 'walk'; this.sitting = false; this.emote = null; break;
       default: this.pose = 'stand'; this.sitting = false; this.emote = null;
     }

@@ -22,9 +22,9 @@ function pngSize(file) {
 function listPng(dir) { try { return fs.readdirSync(dir).filter(f => /\.png$/i.test(f)); } catch { return []; } }
 
 const manifestPath = path.join(aDir, 'manifest.json');
-let m = { characters: { cols: 4, rows: 4, dirRows: ['down', 'left', 'right', 'up'], files: [] }, objects: {} };
+let m = { characters: { cols: 4, rows: 4, dirRows: ['down', 'right', 'left', 'up'], files: [] }, objects: {} };
 try { m = { ...m, ...JSON.parse(fs.readFileSync(manifestPath, 'utf8')) }; } catch {}
-m.characters = m.characters || { cols: 4, rows: 4, dirRows: ['down', 'left', 'right', 'up'], files: [] };
+m.characters = m.characters || { cols: 4, rows: 4, dirRows: ['down', 'right', 'left', 'up'], files: [] };
 const cols = m.characters.cols || 4, rows = m.characters.rows || 4;
 
 const chars = listPng(path.join(aDir, 'characters')).sort();

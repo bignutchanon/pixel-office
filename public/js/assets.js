@@ -11,7 +11,7 @@ let layout = { cols: 4, rows: 4, dirRows: ['down', 'left', 'right', 'up'] };
 
 function hash(s) { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
 function loadImg(url) {
-  return new Promise((res) => { const im = new Image(); im.onload = () => res(im); im.onerror = () => res(null); im.src = url; });
+  return new Promise((res) => { const im = new Image(); im.onload = () => res(im); im.onerror = () => res(null); im.src = url + (url.includes('?') ? '&' : '?') + 'v=' + Date.now(); });
 }
 
 async function load() {

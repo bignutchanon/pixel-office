@@ -4,11 +4,27 @@
     "rows": 4,
     "dirRows": [
       "down",
-      "left",
       "right",
+      "left",
       "up"
     ],
-    "files": []
+    "files": [
+      {
+        "file": "char1.png",
+        "cols": 4,
+        "rows": 4
+      }
+    ]
   },
-  "objects": {}
+  "objects": {
+    "bookshelf": "bookshelf.png",
+    "coffee": "coffee.png",
+    "cooler": "cooler.png",
+    "desk": "desk.png",
+    "meeting": "meeting.png",
+    "plant": "plant.png",
+    "servers": "servers.png",
+    "sofa": "sofa.png",
+    "whiteboard": "whiteboard.png"
+  }
 }
