@@ -1,0 +1,14 @@
+{
+  "characters": {
+    "cols": 4,
+    "rows": 4,
+    "dirRows": [
+      "down",
+      "left",
+      "right",
+      "up"
+    ],
+    "files": []
+  },
+  "objects": {}
+}

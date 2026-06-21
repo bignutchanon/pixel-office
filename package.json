@@ -1,0 +1,10 @@
+{
+  "name": "pixel-office",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Gather-style pixel office that visualizes live Claude Code agents from ~/.claude/projects transcripts. Zero dependencies.",
+  "scripts": {
+    "start": "node server/index.js"
+  },
+  "engines": { "node": ">=18" }
+}

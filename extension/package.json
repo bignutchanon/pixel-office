@@ -1,0 +1,56 @@
+{
+  "name": "pixel-office",
+  "displayName": "Pixel Office — live Claude Code agents",
+  "description": "A Gather-style pixel office that visualizes your live Claude Code agents working at their desks.",
+  "version": "1.5.0",
+  "publisher": "local",
+  "private": true,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://example.com/pixel-office.git"
+  },
+  "engines": {
+    "vscode": "^1.84.0"
+  },
+  "categories": [
+    "Visualization",
+    "Other"
+  ],
+  "keywords": [
+    "claude",
+    "claude code",
+    "agents",
+    "pixel",
+    "gather",
+    "visualization"
+  ],
+  "main": "./extension.js",
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "pixelOffice.open",
+        "title": "Open Pixel Office",
+        "category": "Pixel Office"
+      }
+    ],
+    "configuration": {
+      "title": "Pixel Office",
+      "properties": {
+        "pixelOffice.projectsDir": {
+          "type": "string",
+          "default": "",
+          "description": "Claude Code projects directory to watch. Leave empty to use ~/.claude/projects."
+        },
+        "pixelOffice.windowHours": {
+          "type": "number",
+          "default": 12,
+          "description": "Only show sessions active within this many hours."
+        }
+      }
+    }
+  }
+}

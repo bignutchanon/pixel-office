@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>Pixel Office — live Claude Code agents</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <header id="bar">
+    <div class="brand">🏢 <b>Pixel&nbsp;Office</b> <span class="sub">live Claude&nbsp;Code agents</span></div>
+    <div id="stat" class="stat">connecting…</div>
+    <div id="legend" class="legend"></div>
+    <div class="right">
+      <span id="usage" class="usage"></span>
+      <span class="hint">scroll&nbsp;zoom · drag&nbsp;pan · dbl-click&nbsp;fit</span>
+      <span id="conn" class="dot off" title="connection"></span>
+    </div>
+  </header>
+
+  <canvas id="stage"></canvas>
+
+  <div id="empty" class="empty hidden">
+    <div class="emoji">💤</div>
+    <div>No Claude Code sessions active in the last 45 minutes.</div>
+    <div class="muted">Open a Claude Code terminal and watch an agent walk in ✨</div>
+  </div>
+
+  <script type="module" src="/js/main.js"></script>
+</body>
+</html>
