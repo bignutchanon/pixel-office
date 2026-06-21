@@ -2,7 +2,7 @@
   "name": "pixel-office",
   "displayName": "Pixel Office — live Claude Code agents",
   "description": "A Gather-style pixel office that visualizes your live Claude Code agents working at their desks.",
-  "version": "1.6.0",
+  "version": "1.7.0",
   "publisher": "bignutchanon",
   "private": true,
   "license": "MIT",
