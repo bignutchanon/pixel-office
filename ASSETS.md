@@ -11,6 +11,29 @@ images are present, the app keeps using the built-in pixel art — nothing break
 
 ---
 
+## ⚡ Fastest: auto-generate the whole set (OpenAI API)
+
+If you have an **OpenAI API key**, generate every character + furniture image in
+one command — no manual prompting:
+
+```bash
+# PowerShell:  $env:OPENAI_API_KEY = "sk-..."
+# bash:        export OPENAI_API_KEY=sk-...
+node scripts/gen-art.mjs            # characters + furniture → public/assets/ → manifest
+node scripts/gen-art.mjs chars      # characters only
+```
+
+It calls `gpt-image-1` once per image (transparent PNG), saves into
+`public/assets/`, and refreshes `manifest.json`. Cost = one image call each
+(`PIXEL_ART_QUALITY=low|medium|high`, default medium). Then refresh
+http://localhost:4317 — or for the extension run `node scripts/sync-extension.js`
+and repackage. (Codex CLI can run this script for you in a session where its
+`OPENAI_API_KEY` is set.)
+
+Prefer to hand-pick the art? Use the manual ChatGPT route below.
+
+---
+
 ## 1) Characters (the important ones)
 
 Each Claude Code session becomes one of these characters. Make a few different

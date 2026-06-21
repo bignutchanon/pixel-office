@@ -37,10 +37,14 @@ function drawDeskUnit(ctx, cx, cy, screen, glyph, busy, t) {
   if (img) { const w = DESK_W - 6, h = w * (img.height / img.width); ctx.drawImage(img, Math.round(cx + 3), Math.round(cy + 6), Math.round(w), Math.round(h)); }
   else drawWorkstation(ctx, cx, cy, screen, glyph, busy, t);
 }
+// target footprints (world units) so high-res generated PNGs render at the right size
+const OBJ_W = { coffee: 16, cooler: 11, sofa: 48, plant: 13, whiteboard: 80, meeting: 92, servers: 64, bookshelf: 40 };
 function drawAmenityUnit(ctx, a, t) {
   const img = Assets.obj(a.type);
-  if (img) ctx.drawImage(img, Math.round(a.x), Math.round(a.y), img.width, img.height);
-  else drawAmenity(ctx, a, t);
+  if (img) {
+    const w = OBJ_W[a.type] || 24, h = w * (img.height / img.width);
+    ctx.drawImage(img, Math.round(a.x), Math.round(a.y), Math.round(w), Math.round(h));
+  } else drawAmenity(ctx, a, t);
 }
 
 export class Scene {
