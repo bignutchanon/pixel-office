@@ -2,13 +2,13 @@
   "name": "pixel-office",
   "displayName": "Pixel Office — live Claude Code agents",
   "description": "A Gather-style pixel office that visualizes your live Claude Code agents working at their desks.",
-  "version": "1.5.0",
-  "publisher": "local",
+  "version": "1.6.0",
+  "publisher": "bignutchanon",
   "private": true,
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://example.com/pixel-office.git"
+    "url": "https://github.com/bignutchanon/pixel-office.git"
   },
   "engines": {
     "vscode": "^1.84.0"
@@ -52,5 +52,10 @@
         }
       }
     }
+  },
+  "icon": "icon.png",
+  "homepage": "https://github.com/bignutchanon/pixel-office#readme",
+  "bugs": {
+    "url": "https://github.com/bignutchanon/pixel-office/issues"
   }
 }
